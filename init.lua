@@ -437,6 +437,100 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>ld', function()
+        -- Get current file path relative to project root
+        local file_path = vim.fn.expand('%:p')
+        local root_dir = vim.lsp.buf.list_workspace_folders()[1]
+
+        if not root_dir then
+          print("No workspace root found")
+          return
+        end
+
+        -- Get relative path and convert to module notation
+        local rel_path = file_path:sub(#root_dir + 2) -- +2 to skip the trailing /
+        local module_path = rel_path:gsub('%.py$', ''):gsub('/', '.')
+
+        -- Get the word under cursor (class or function name)
+        local symbol = vim.fn.expand('<cword>')
+
+        -- Try to determine if we're inside a class by looking at the context
+        local line_num = vim.fn.line('.')
+        local lines = vim.api.nvim_buf_get_lines(0, 0, line_num, false)
+
+        -- Search backwards for the most recent class definition
+        local class_name = nil
+        for i = #lines, 1, -1 do
+          local class_match = lines[i]:match('^class%s+([%w_]+)')
+          if class_match then
+            class_name = class_match
+            break
+          end
+        end
+
+        -- Build the full qualified name
+        local full_name = module_path
+        if class_name then
+          full_name = full_name .. '.' .. class_name
+        end
+        full_name = full_name .. '.' .. symbol
+
+        print("Looking up:", full_name)
+
+        -- Open documentation in a buffer
+        vim.cmd('split')
+        local doc_buf = vim.api.nvim_create_buf(false, true)
+        vim.api.nvim_set_current_buf(doc_buf)
+
+        local output = vim.fn.systemlist('python3 -m pydoc "' .. full_name .. '"')
+        vim.api.nvim_buf_set_lines(doc_buf, 0, -1, false, output)
+        vim.bo[doc_buf].modifiable = false
+        vim.bo[doc_buf].filetype = 'text'
+      end, { desc = '[L]ocal [D]ocumentation for symbol under cursor' })
+
+      vim.keymap.set('n', '<leader>pd', function()
+        local params = vim.lsp.util.make_position_params(0, 'utf-8')
+        local bufnr = vim.api.nvim_get_current_buf()
+        vim.lsp.buf_request(bufnr, 'textDocument/definition', params, function(err, result, ctx, config)
+          if result and result[1] then
+            local uri = result[1].uri or result[1].targetUri
+            local file_path = vim.uri_to_fname(uri)
+            -- Extract module path from typeshed or site-packages
+            local module_path = file_path:match('/stdlib/(.*)%.pyi?$') -- typeshed
+                or file_path:match('/stubs/[^/]+/(.*)%.pyi?$')         -- third-party stubs
+                or file_path:match('.*/site%-packages/(.*)%.pyi?$')
+                or file_path:match('.*/dist%-packages/(.*)%.pyi?$')
+                or file_path:match('.*python[%d%.]+/(.*)%.pyi?$')
+
+            if module_path then
+              module_path = module_path:gsub('/', '.')
+              local word = vim.fn.expand('<cword>')
+              local full_name = module_path .. '.' .. word
+
+              -- Use a scratch buffer instead of terminal to show full output
+              vim.cmd('split')
+              local doc_buf = vim.api.nvim_create_buf(false, true)
+              vim.api.nvim_set_current_buf(doc_buf)
+
+              -- Get pydoc output
+              local output = vim.fn.systemlist('python3 -m pydoc "' .. full_name .. '"')
+              vim.api.nvim_buf_set_lines(doc_buf, 0, -1, false, output)
+              vim.bo[doc_buf].modifiable = false
+              vim.bo[doc_buf].filetype = 'text'
+            else
+              local word = vim.fn.expand('<cword>')
+              vim.cmd('split')
+              local doc_buf = vim.api.nvim_create_buf(false, true)
+              vim.api.nvim_set_current_buf(doc_buf)
+              local output = vim.fn.systemlist('python3 -m pydoc "' .. word .. '"')
+              vim.api.nvim_buf_set_lines(doc_buf, 0, -1, false, output)
+              vim.bo[doc_buf].modifiable = false
+              vim.bo[doc_buf].filetype = 'text'
+            end
+          end
+        end)
+      end, { desc = '[P]ython [D]ocumentation for symbol under cursor' })
+
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -893,7 +987,8 @@ require('lazy').setup({
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     -- 'folke/tokyonight.nvim',
-    'rebelot/kanagawa.nvim',
+    -- 'rebelot/kanagawa.nvim',
+    'sainnhe/gruvbox-material',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
       ---@diagnostic disable-next-line: missing-fields
@@ -907,7 +1002,7 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       -- vim.cmd.colorscheme 'tokyonight-night'
-      vim.cmd.colorscheme 'kanagawa'
+      vim.cmd.colorscheme 'gruvbox-material'
     end,
   },
 
@@ -968,6 +1063,15 @@ require('lazy').setup({
         additional_vim_regex_highlighting = { 'ruby' },
       },
       indent = { enable = true, disable = { 'ruby' } },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = '<CR>',
+          node_incremental = '<CR>',
+          scope_incremental = false, -- disable scope incremental (optional)
+          node_decremental = '<BS>',
+        },
+      },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
@@ -990,7 +1094,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
