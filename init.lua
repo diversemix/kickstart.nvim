@@ -95,7 +95,7 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -110,6 +110,9 @@ vim.o.number = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
+
+-- Enable true colours
+vim.o.termguicolors = true
 
 -- Don't show the mode, since it's already in the status line
 vim.o.showmode = false
@@ -408,25 +411,31 @@ require('lazy').setup({
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
-        -- You can put your default mappings / updates / etc. in here
-        --  All the info you're looking for is in `:help telescope.setup()`
-        --
         defaults = {
           vimgrep_arguments = {
             'ag',
             '--nocolor',
             '--nogroup',
-            '--hidden',
             '--vimgrep',
-            '--ignore-case',
+            '--smart-case', -- changed from --ignore-case
+            -- removed --hidden
           },
-          find_command = { 'ag', '--nocolor', '--nogroup', '--hidden', '-g', '' },
           mappings = {
             i = { ['<c-enter>'] = 'to_fuzzy_refine' },
           },
         },
         pickers = {
-          find_command = { 'ag', '--nocolor', '--nogroup', '--hidden', '-g', '' },
+          find_files = {
+            find_command = {
+              'ag',
+              '--nocolor',
+              '--nogroup',
+              '-g',
+              '',
+              '--skip-vcs-ignores', -- respects .gitignore
+              -- removed --hidden
+            },
+          },
         },
         extensions = {
           ['ui-select'] = {
@@ -438,7 +447,12 @@ require('lazy').setup({
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
-
+      local live_grep_debounced = function()
+        require('telescope.builtin').live_grep {
+          -- These might help but aren't true debounce:
+          debounce = 250, -- This option may or may not exist in your version
+        }
+      end
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
@@ -446,7 +460,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sg', live_grep_debounced, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
@@ -1120,7 +1134,7 @@ require('lazy').setup({
       })
     end,
     opts = {
-      close_if_last_window = false,
+      close_if_last_window = true,
       enable_diagnostics = true,
       enable_git_status = true,
       popup_border_style = 'rounded',
