@@ -1,0 +1,34 @@
+diff --git a/init.lua b/init.lua
+index 6ede2f0..a735ecc 100644
+--- a/init.lua
++++ b/init.lua
+@@ -407,12 +407,23 @@ require('lazy').setup({
+         -- You can put your default mappings / updates / etc. in here
+         --  All the info you're looking for is in `:help telescope.setup()`
+         --
+-        -- defaults = {
+-        --   mappings = {
+-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+-        --   },
+-        -- },
+-        -- pickers = {}
++        defaults = {
++          vimgrep_arguments = {
++            'ag',
++            '--nocolor',
++            '--nogroup',
++            '--hidden',
++            '--vimgrep',
++            '--ignore-case'
++          },
++          find_command = { 'ag', '--nocolor', '--nogroup', '--hidden', '-g', '' },
++          mappings = {
++            i = { ['<c-enter>'] = 'to_fuzzy_refine' },
++          },
++        },
++        pickers = {
++            find_command = { 'ag', '--nocolor', '--nogroup', '--hidden', '-g', '' },
++        },
+         extensions = {
+           ['ui-select'] = {
+             require('telescope.themes').get_dropdown(),
