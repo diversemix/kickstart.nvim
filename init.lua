@@ -583,7 +583,16 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
-
+  -- Copilot
+  {
+    "github/copilot.vim",
+    enabled = vim.env.COPILOT_DISABLE ~= "1",
+    config = function()
+      -- Optional: tweak Copilot settings
+      vim.g.copilot_no_tab_map = true -- don’t use <Tab> for completion
+      vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+    end,
+  },
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
