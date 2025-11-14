@@ -1,0 +1,13 @@
+diff --git a/init.lua b/init.lua
+index db5a056..70ffd02 100644
+--- a/init.lua
++++ b/init.lua
+@@ -785,7 +785,7 @@ require('lazy').setup({
+         --    https://github.com/pmizio/typescript-tools.nvim
+         --
+         -- But for many setups, the LSP (`ts_ls`) will work just fine
+-        ts_ls = {},
++        -- ts_ls = {},
+         --
+ 
+         lua_ls = {
