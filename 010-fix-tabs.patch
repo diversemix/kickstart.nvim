@@ -1,0 +1,31 @@
+diff --git a/init.lua b/init.lua
+index 84b656d..2c13144 100644
+--- a/init.lua
++++ b/init.lua
+@@ -173,6 +173,10 @@ vim.o.scrolloff = 10
+ -- See `:help 'confirm'`
+ vim.o.confirm = true
+ 
++-- Set default tab/space settings
++vim.o.expandtab = true -- Use spaces instead of tabs
++vim.o.shiftwidth = 4 -- Shift 2 spaces when tab
++
+ -- [[ Basic Keymaps ]]
+ --  See `:help vim.keymap.set()`
+ 
+@@ -585,12 +589,12 @@ require('lazy').setup({
+   },
+   -- Copilot
+   {
+-    "github/copilot.vim",
+-    enabled = vim.env.COPILOT_DISABLE ~= "1",
++    'github/copilot.vim',
++    enabled = vim.env.COPILOT_DISABLE ~= '1',
+     config = function()
+       -- Optional: tweak Copilot settings
+       vim.g.copilot_no_tab_map = true -- don’t use <Tab> for completion
+-      vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
++      vim.api.nvim_set_keymap('i', '<C-J>', 'copilot#Accept("<CR>")', { silent = true, expr = true })
+     end,
+   },
+   -- LSP Plugins
