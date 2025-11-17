@@ -1,0 +1,26 @@
+diff --git a/init.lua b/init.lua
+index 478a062..50341de 100644
+--- a/init.lua
++++ b/init.lua
+@@ -230,6 +230,13 @@ vim.api.nvim_create_autocmd('TextYankPost', {
+   end,
+ })
+ 
++-- diversemix/notes
++--
++local ok, notes = pcall(require, 'notes')
++if ok then
++  notes.setup()
++end
++
+ -- [[ Install `lazy.nvim` plugin manager ]]
+ --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
+ local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
+@@ -256,7 +263,6 @@ rtp:prepend(lazypath)
+ --    :Lazy update
+ --
+ -- NOTE: Here is where you install your plugins.
+-require('notes').setup()
+ require('lazy').setup({
+   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
+   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
