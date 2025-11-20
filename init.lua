@@ -83,7 +83,8 @@ I hope you enjoy your Neovim journey,
 
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
-
+-- Add cargo bin to PATH for Neovim
+vim.env.PATH = vim.fn.expand '~/.cargo/bin' .. ':' .. vim.env.PATH
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -423,29 +424,8 @@ require('lazy').setup({
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
         defaults = {
-          vimgrep_arguments = {
-            'ag',
-            '--nocolor',
-            '--nogroup',
-            '--vimgrep',
-            '--smart-case', -- changed from --ignore-case
-            -- removed --hidden
-          },
           mappings = {
             i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-          },
-        },
-        pickers = {
-          find_files = {
-            find_command = {
-              'ag',
-              '--nocolor',
-              '--nogroup',
-              '-g',
-              '',
-              '--skip-vcs-ignores', -- respects .gitignore
-              -- removed --hidden
-            },
           },
         },
         extensions = {
