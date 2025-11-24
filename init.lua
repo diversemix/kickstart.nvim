@@ -302,6 +302,20 @@ require('lazy').setup({
       },
     },
   },
+  {
+    'dhruvasagar/vim-table-mode',
+    ft = 'markdown',
+    config = function()
+      vim.g.table_mode_corner = '|'
+      -- Auto-enable for markdown files
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = 'markdown',
+        callback = function()
+          vim.cmd 'TableModeEnable'
+        end,
+      })
+    end,
+  },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
