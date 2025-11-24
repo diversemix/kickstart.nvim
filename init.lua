@@ -311,7 +311,7 @@ require('lazy').setup({
       vim.api.nvim_create_autocmd('FileType', {
         pattern = 'markdown',
         callback = function()
-          vim.cmd 'TableModeEnable'
+          vim.cmd 'silent! TableModeEnable'
         end,
       })
     end,
