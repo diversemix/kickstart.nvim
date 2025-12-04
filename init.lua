@@ -91,6 +91,9 @@ vim.env.PATH = vim.fn.expand '~/.cargo/bin' .. ':' .. vim.env.PATH
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Disable table-mode's default keymaps
+vim.g.table_mode_disable_mappings = 1
+
 -- Disable netrw
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
@@ -187,6 +190,12 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- Table mode mappings
+vim.keymap.set('n', '<leader>tj', '}|', { desc = '[T]Table move [J]down' })
+vim.keymap.set('n', '<leader>tk', '{|', { desc = '[T]Table move [K]up' })
+vim.keymap.set('n', '<leader>th', '[|', { desc = '[T]Table move [H]left' })
+vim.keymap.set('n', '<leader>tl', ']|', { desc = '[T]Table move [L]right' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
