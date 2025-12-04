@@ -608,6 +608,43 @@ require('lazy').setup({
       vim.api.nvim_set_keymap('i', '<C-J>', 'copilot#Accept("<CR>")', { silent = true, expr = true })
     end,
   },
+  -- Copilot Chat
+  {
+    'CopilotC-Nvim/CopilotChat.nvim',
+    branch = 'main',
+    dependencies = {
+      { 'zbirenbaum/copilot.lua' }, -- or github/copilot.vim
+      { 'nvim-lua/plenary.nvim' }, -- for curl, log wrapper
+    },
+    build = 'make tiktoken', -- Only on MacOS or Linux
+    opts = {
+      -- See Configuration section for options
+      debug = false, -- Enable debugging
+      -- See defaults: https://github.com/CopilotC-Nvim/CopilotChat.nvim/blob/main/lua/CopilotChat/config.lua
+    },
+    keys = {
+      -- Quick chat with Copilot
+      {
+        '<leader>cc',
+        function()
+          local input = vim.fn.input 'Quick Chat: '
+          if input ~= '' then
+            require('CopilotChat').ask(input, { selection = require('CopilotChat.select').buffer })
+          end
+        end,
+        desc = 'CopilotChat - Quick chat',
+      },
+      -- Open chat window
+      { '<leader>co', '<cmd>CopilotChatOpen<cr>', desc = 'CopilotChat - Open chat' },
+      { '<leader>ct', '<cmd>CopilotChatToggle<cr>', desc = 'CopilotChat - Toggle chat' },
+      -- Code-related commands
+      { '<leader>ce', '<cmd>CopilotChatExplain<cr>', desc = 'CopilotChat - Explain code', mode = { 'n', 'v' } },
+      { '<leader>cr', '<cmd>CopilotChatReview<cr>', desc = 'CopilotChat - Review code', mode = { 'n', 'v' } },
+      { '<leader>cf', '<cmd>CopilotChatFix<cr>', desc = 'CopilotChat - Fix code', mode = { 'n', 'v' } },
+      { '<leader>cd', '<cmd>CopilotChatDocs<cr>', desc = 'CopilotChat - Add documentation', mode = { 'n', 'v' } },
+      { '<leader>cs', '<cmd>CopilotChatTests<cr>', desc = 'CopilotChat - Generate tests', mode = { 'n', 'v' } },
+    },
+  },
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
