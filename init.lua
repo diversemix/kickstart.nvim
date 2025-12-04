@@ -845,7 +845,6 @@ require('lazy').setup({
           },
         },
       }
-
       -- Ensure the servers and tools above are installed
       --
       -- To check the current status of installed tools and/or manually install
@@ -863,8 +862,16 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
       })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      vim.defer_fn(function()
+        -- This is required to properly load the python binary path
+        require('mason-nvim-dap').setup {
+          ensure_installed = { 'python' },
+          automatic_installation = false,
+          automatic_setup = true,
+        }
+      end, 100)
 
+      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
@@ -881,7 +888,12 @@ require('lazy').setup({
       }
     end,
   },
-
+  {
+    'szw/vim-maximizer',
+    keys = {
+      { '<Leader>dz', '<cmd>MaximizerToggle<CR>', desc = 'Toggle Maximize Window' },
+    },
+  },
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
@@ -1206,5 +1218,6 @@ require('lazy').setup({
   },
 })
 
+require 'debug-keys'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
